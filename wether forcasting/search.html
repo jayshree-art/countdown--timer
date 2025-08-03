@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="weather-app">
+        <main class="main-content">
+            <h2>Search Weather</h2>
+            <input type="text" id="search-city" placeholder="Enter city name" />
+            <button id="search-btn">Search</button>
+            <div id="result" style="margin-top:2rem;">
+                <div id="city"></div>
+                <div id="temp"></div>
+                <div id="desc"></div>
+            </div>
+        </main>
+    </div>
+    <script>
+    document.getElementById('search-btn').onclick = function() {
+        const city = document.getElementById('search-city').value.trim();
+        if (!city) {
+            alert('Please enter a city name!');
+            return;
+        }
+        fetch(`http://127.0.0.1:5000/weather?city=${encodeURIComponent(city)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('City not found');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('city').textContent = "City: " + data.city;
+                document.getElementById('temp').textContent = "Temperature: " + data.temperature + "°C";
+                document.getElementById('desc').textContent = "Description: " + data.description;
+            })
+            .catch(() => {
+                document.getElementById('city').textContent = '';
+                document.getElementById('temp').textContent = '';
+                document.getElementById('desc').textContent = 'City not found!';
+            });
+    };
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecasting</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="weather-app">
+        <aside class="sidebar">
+            <div class="logo">WeatherWise</div>
+            <div class="status">
+                <div class="status-label">Status</div>
+                <div class="status-value">Dangerous</div>
+                <div class="status-graph"></div>
+            </div>
+            <div class="select-area">
+                <div class="area-label">Select Area</div>
+<div class="area-globe">
+    <iframe
+        id="area-map"
+        frameborder="0"
+        allowfullscreen
+        loading="lazy"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-74.05,40.68,-73.85,40.78&layer=mapnik&marker=40.73,-73.95">
+    </iframe>
+</div>
+                <div class="area-name">Brooklyn, New York, USA</div>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="search-bar-container">
+                <input type="text" id="search-city" placeholder="Enter city name" />
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="location-date">
+                Brooklyn, New York, USA <span class="date">(Friday, January 4)</span>
+            </div>
+            <div class="temperature">
+                <span class="temp-value">18°</span>
+                <span class="temp-highlow">H 29° L 12°</span>
+            </div>
+            <div class="weather-desc">Stormy<br>with partly cloudy</div>
+            <div class="forecast">
+                <div class="forecast-day">Sunday <span>28°</span></div>
+                <div class="forecast-day">Monday <span>26°</span></div>
+                <div class="forecast-day">Tuesday <span>27°</span></div>
+                <div class="forecast-day">Wednesday <span>23°</span></div>
+                <div class="forecast-day">Thursday <span>30°</span></div>
+                <div class="forecast-day">Friday <span>25°</span></div>
+            </div>
+            <div class="recently-searched">
+                <div class="searched-item">
+                    <div class="city">Liverpool, UK</div>
+                    <div class="desc">Partly Cloudy</div>
+                    <div class="temp">16°</div>
+                </div>
+                <div class="searched-item">
+                    <div class="city">Palermo, Italy</div>
+                    <div class="desc">Rain/Thunder</div>
+                    <div class="temp">-2°</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    function updateWeather(data) {
+        document.querySelector('.temp-value').textContent = Math.round(data.temperature) + '°';
+        document.querySelector('.weather-desc').textContent = data.description;
+        document.querySelector('.area-name').textContent = data.city;
+        document.querySelector('.location-date').innerHTML = `${data.city} <span class="date">${data.date ? `(${data.date})` : ''}</span>`;
+        document.querySelector('.temp-highlow').textContent = `H ${data.high}° L ${data.low}°`;
+    }
+
+    // On page load, show default weather
+    fetch('http://127.0.0.1:5000/weather')
+      .then(response => response.json())
+      .then(updateWeather);
+
+    // On search, update weather
+    document.getElementById('search-btn').onclick = function() {
+        const city = document.getElementById('search-city').value.trim();
+        if (!city) {
+            alert('Please enter a city name!');
+            return;
+        }
+        fetch(`http://127.0.0.1:5000/weather?city=${encodeURIComponent(city)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('City not found');
+                return response.json();
+            })
+            .then(updateWeather)
+            .catch(() => {
+                document.querySelector('.temp-value').textContent = '--';
+                document.querySelector('.weather-desc').textContent = 'City not found!';
+                document.querySelector('.area-name').textContent = '';
+                document.querySelector('.location-date').innerHTML = 'City not found! <span class="date"></span>';
+                document.querySelector('.temp-highlow').textContent = '';
+            });
+    };
+    </script>
+</body>
+</html>
